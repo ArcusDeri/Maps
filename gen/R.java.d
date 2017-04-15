@@ -1,0 +1,23 @@
+C:\temp\MarcinMichniak_Mapy\gen\com\mmichniak\projekty\R.java \
+ : C:\temp\MarcinMichniak_Mapy\res\drawable\icon.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-hdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-hdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-ldpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-ldpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-mdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-mdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-xhdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\res\drawable-xhdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\res\layout\main.xml \
+C:\temp\MarcinMichniak_Mapy\res\values\strings.xml \
+C:\temp\MarcinMichniak_Mapy\res\xml\config.xml \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable\icon.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-hdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-hdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-ldpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-ldpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-mdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-mdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-xhdpi\icon.png \
+C:\temp\MarcinMichniak_Mapy\bin\res\drawable-xhdpi\ic_launcher.png \
+C:\temp\MarcinMichniak_Mapy\bin\AndroidManifest.xml \

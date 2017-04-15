@@ -1,0 +1,499 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mapy</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false&language=pl"></script>
+    <script src="gmap3.min.js"></script>
+    <script>
+        var x, y, z;
+        var posX, posY, posZoom;
+        var mNumbers = [];
+        var gArray = [];
+        var locationsTab = [];
+        var colorTab = ["#000000", "#2CABF4", "#ED4259", "#FFCD5A", "#17D16A", "#F670EB", "#4C6472", "#FA0032", "#B0D794"];
+        var selectColor = "#2CABF4";
+        var mCounter = 0;
+        var msCounter = 1;
+        var whichOne;
+        var nameTable = []; 
+        var einTripet = []; //przechowuje pojedyncze sciezki dla wczytanych wycieczek
+        var colorTable = []; //przehchowuje kolory
+        var timeTable = [];
+        var state = false;
+        $(document).on("pageinit", "#starter", function (event) {
+            var szer, wys;
+            szer = (window.innerWidth-128) / 2;
+            wys = (window.innerHeight-128) / 2;
+            $("#logo").css("position", "fixed");
+            $("#logo").css("top", wys+"px");
+            $("#logo").css("left", szer+"px");
+            setTimeout(function () {
+                $.mobile.navigate("#page", { transition: "turn" })
+            }, 2000);
+            
+        })
+        $(document).on("pageinit","#page",function (event) {
+
+            $("#mapDiv").width("100%");
+            $("#mapDiv").height((window.innerHeight/2)+"px");
+
+            x = 50.0540;
+            y = 19.947;
+            z = 11;
+            setTimeout(function () {
+                $("#mapDiv").gmap3({
+                    map: {
+                        options: {
+                            center: [x, y],
+                            latLng: [x, y],
+                            zoom: z,
+                            disableDefaultUI: true
+                        },
+                        events: {
+                            click: function (map, event) {
+                                posX = event.latLng.lat();
+                                posY = event.latLng.lng();
+                                posZoom = map.getZoom();
+                                console.log(posX);
+                                console.log(posY);
+                                addMarker();                                
+                            }
+                        }
+                    },
+                })
+            }, 150); //musi byc opozniona, nie wczytywalo sie poprawnie w google chrome
+            
+
+            $("#button4").click(function () {
+                //alert("tak");
+                $("#heder").html("Maps");
+                $("#mapDiv").gmap3('clear', 'markers');
+                locationsTab = [];
+                item = $(".place");
+                item.remove();
+
+                item = $(".tour");
+                item.remove();
+
+                msCounter = 0;
+                mCounter = 0;
+            });
+            function addMarker() {
+
+                $("#mapDiv").gmap3({
+                    marker: {
+                        latLng: [posX, posY],
+                        tag: 'mar' + mCounter,
+                    }
+                })
+                mNumbers.push(mCounter);
+                console.log(mNumbers);
+
+                $("#myList").append("<li class='place'><a>My place " + mCounter + "</a><a class='remove' data-icon='minus'></a></li>");
+                $("#myList").listview("refresh");
+                locationsTab.push([posX, posY]);
+                mCounter++;
+                if (state) {
+                    street(posX, posY);
+                }
+            }
+            $("#myList").on("click", ".place", function () {
+                who = $(this).index();
+                //console.log(who);
+                //console.log(locationsTab[who]);
+                $("#mapDiv").gmap3({
+                    map: {
+                        options: {
+                            center: locationsTab[who],
+                        }
+                    }
+                })
+            });
+            $("#myList").on("click", ".remove", function () {
+                whichOne = $(this).parent().index();
+                //console.log(whichOne);
+                console.log(locationsTab);
+
+                $("#mapDiv").gmap3({
+                    clear: {
+                        tag: 'mar' + mNumbers[whichOne],
+                    }
+                })
+                mNumbers.splice(whichOne, 1);
+                locationsTab.splice(whichOne, 1);
+                //console.log(locationsTab);
+                item = $(this).parent();
+                item.remove();
+
+                mCounter--;
+            })
+            function drawMap(color) {
+                selectColor = color;
+                $("#mapDiv").gmap3({
+                    polyline: {
+                        options: {
+                            strokeColor: color,
+                            strokeOpacity: 0.8,
+                            strokeWeight: 5,
+                            path: locationsTab
+                        }
+                    }
+                })
+            }
+            function DrawChildElement() {
+                var g = 0;
+                var cDiv = document.getElementById("colorDiv");
+                for (var i = 0; i < 3; i++) {
+                    for (var j = 0; j < 3; j++) {
+                        var small = document.createElement("div");
+                        cDiv.appendChild(small);
+                        small.style.width = "40px";
+                        small.style.height = "40px";
+                        small.style.position = "absolute";
+                        small.style.left = i * 50 + "px";
+                        small.style.top = j * 50 + "px";
+                        small.style.margin = "8px";
+                        small.style.background = colorTab[g];
+                        small.style.borderRadius = "100%";
+                        small.id = g;
+                        g++;
+                        small.addEventListener("click", change, false);
+                    }
+                }
+            }
+            function change(e) {
+                var small = e.target;
+                //console.log(small);
+                var id = small.id;
+                //console.log(id);
+                drawMap(colorTab[id]);
+
+            }
+
+            $("#lat").change(function () {
+                x = $("#lat").val();
+                $("#mapDiv").gmap3({
+                    map: {
+                        options: {
+                            center: [x, y],
+                            zoom: parseInt(z),
+                        },
+                    }
+                })
+            });
+            $("#long").change(function () {
+                y = $("#long").val();
+                $("#mapDiv").gmap3({
+                    map: {
+                        options: {
+                            center: [x, y],
+                            zoom: parseInt(z),
+                        },
+                    }
+                })
+            });
+            $("#zoom").change(function () {
+                z = $("#zoom").val();
+                $("#mapDiv").gmap3({
+                    map: {
+                        options: {
+                            center: [x, y],
+                            zoom: parseInt(z),
+                        },
+                    }
+                })
+            });
+            $("#menu").click(function () {
+                $("#panel1").panel("open");
+            });
+            $("#tripList").click(function () {
+                $("#panel2").panel("open");
+            });
+            $("#col1").click(function () {
+                $("#colorPop").popup("open");
+                DrawChildElement();
+            });
+            $(".closePanel").click(function () {
+                $("#panel1").panel("close");
+                $("#panel2").panel("close");
+            })
+            $("#button1").click(function () {
+                drawMap(selectColor);
+                console.log(locationsTab);
+            })
+            $("#button2").click(function () {
+                var Imie = prompt("podaj imie");
+                var myDate = new Date();
+                var myY = myDate.getFullYear();
+                myY += "-" + myDate.getMonth() + "-" + myDate.getDate() + " hour: " + myDate.getHours() + ":" + myDate.getMinutes();
+                //myY = myDate.getDate();
+                var tab = [];
+                tab.push({ Name: Imie, Date: myY, Color: selectColor, Track: locationsTab });
+                console.log(tab);
+                var sendTAB = [];
+                for (var i = 0; i < tab.length; i++) {
+                    sendTAB.push(tab[i].Name, tab[i].Date, tab[i].Color, tab[i].Track);
+                }
+                var sendOBJ = {
+                    SendData: JSON.stringify(sendTAB)
+
+                }
+                $.mobile.showPageLoadingMsg();
+                $.ajax({
+                    type: "POST",
+                    url: "http://3ia2.spec.pl.hostingasp.pl/Michniak_Marcin/MAPS_PROJECT/SaveFile.aspx",
+                    //url: "http://localhost:49541/SaveFile.aspx ",
+                    data: sendOBJ,
+                    dataType: "text",
+                    success: function (response) {
+                        $.mobile.hidePageLoadingMsg();
+                        alert(response + " udalo sie");
+                    },
+                    error: function (xhr) {
+                        alert(xhr.responseText + " nieudalo sie")
+                        $.mobile.hidePageLoadingMsg();
+                    }
+                })
+            })
+            $("#button3").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "http://3ia2.spec.pl.hostingasp.pl/Michniak_Marcin/MAPS_PROJECT/ReadData.aspx",
+                   // url: "http://localhost:49541/ReadData.aspx",
+                    dataType: "text",
+                    success: onSuccess,
+                    error: onError
+                });
+                function onSuccess(response) {
+                    //var allTripsOnServer = JSON.parse(response);
+                    alert("Dzialam!");
+                    var allTripsOnServer = JSON.parse(response);
+                    // console.log(allTripsOnServer);
+                    console.log(allTripsOnServer.length);
+                    for (var i = 0; i < allTripsOnServer.length; i++) {
+                        oneTrip = allTripsOnServer[i];
+                        //einTrip.push(allTripsOnServer[i]);
+                        //console.log("einTrip " + einTrip);
+                        //console.log("einTrip[0] " + einTrip[0]);
+                        
+                        locName = oneTrip[0];
+                        nameTable.push(locName);
+                        //console.log("einTrip[0]" + einTrip[0]);
+
+                        //console.log("locName= " + locName);
+                        locTime = oneTrip[1];
+                        timeTable.push(locTime);
+                        //console.log("einTrip[1]" + einTrip[1]);
+
+                        locColor = oneTrip[2];
+                        colorTable.push(locColor);
+                        //console.log("eintrip " + einTrip);
+
+                        console.log(locTime);
+                        console.log(locColor);
+                        oneTrip.splice(0, 3);
+                        console.log("oneTrip "+oneTrip);
+                        console.log("onetrip[0] " + oneTrip[0]);
+                        einTripet.push(oneTrip[0]);
+
+                        console.log(locationsTab);
+                                             
+
+                        $("#myTripList").append("<li class='tour'><a>Trip " + msCounter +"</a></li>");
+                        $("#myTripList").listview("refresh");
+                        msCounter++;
+
+                    }
+                }
+                function onError(xhr) {
+                    alert(xhr + " Cos poszlo nie tak");
+                }
+            })
+            $("#myTripList").on("click", ".tour", function () {
+                $("#mapDiv").gmap3('clear', 'markers');
+                locationsTab = [];
+                item = $(".place");
+                item.remove();              
+             
+                item = $(this).index();
+                console.log(item);
+                $("#mapDiv").gmap3({
+                    marker: {
+                        values: einTripet[item]
+                    },
+                    polyline: {
+                        options: {
+                            strokeColor: colorTable[item],
+                            strokeOpacity: 0.8,
+                            strokeWeight: 4,
+                            path: einTripet[item]
+                        }
+                    },
+                    map: {
+                        options: {
+                            center: einTripet[item][0],
+                        }
+                    }
+                })               
+                $("#heder").html("Maps <br/>Owner: " + nameTable[item] +" "+ timeTable[item]);
+            });
+            $("#getloc").on("tap", function () {
+                $("#mapDiv").gmap3({
+                    getgeoloc: {
+                        callback: function (latLng) {
+                            if (latLng) {
+                                jQuery(this).gmap3({
+
+                                    marker: {
+                                        latLng: latLng
+                                    },
+                                    map: {
+                                        options: {
+                                            zoom: z
+                                        }
+                                    }
+
+                                });
+                                jQuery(this).gmap3("get").setCenter(latLng);
+                            } else {
+                                jQuery("#gmapError").show().fadeOut(8000);
+                            }
+                        }
+                    }
+                })
+            })
+            $("#svToggle").click(function () {
+                
+                state = !state; //globalna
+                if (state) {
+                    $("#streetView").css("width", "100%");
+                    street(posX, posY);
+                }
+                else
+                    $("#streetView").css("width", "0px");
+            })
+            function street(pos1, pos2) {
+                $("#mapDiv").gmap3({
+                    streetviewpanorama: {
+                        options: {
+                            container: $("#streetView"),
+                            opts: {
+                                position: [pos1, pos2],
+                                pov: {
+                                    heading: 4,
+                                    pitch: 5,
+                                    zoom: 1
+                                }
+                            },
+                        }
+                    }
+                })
+            }
+                       
+            $("#exit").on("tap",function () {
+                //alert("wyjscie");
+                navigator.app.exitApp();
+            })
+        });
+
+    </script>
+    <style>
+        .ui-content{
+            padding: 0px;
+        }
+        #streetView{
+            width: 0;
+            height: 300px;   
+        }
+        #menu {
+            position: absolute;
+            top: 8px;
+            right: 40px;
+        }
+
+        #tripList {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+        }
+
+        #col1 {
+            position: absolute;
+            top: 8px;
+            right: 70px;
+        }
+
+        #colorPop {
+            background-color: white;
+        }
+
+        #colorDiv {
+            width: 158px;
+            height: 158px;
+            background-color: white;
+            border-radius: 12px;
+        }
+        h6{
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }        
+    </style>
+</head>
+<body>
+    <div data-role="page" id="starter" data-theme="a"><img id="logo" src="logo.png" /></div>
+
+
+    <div data-role="page" id="page" data-theme="b">
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <button id="exit">Quit</button>
+            <h1 id="heder">Maps</h1>
+
+            <img id="tripList" src="trip.png" height="26" width="26" />
+            <img id="menu" src="menu.png" height="26" width="26" />
+            <img id="col1" src="color.png" height="26" width="26" />
+
+
+        </div>
+        <div id="secondPage" data-role="content">
+            <div id="mapDiv"></div>
+            <div id="streetView"></div>
+        </div>       
+
+        <div id="panel1" data-display="overlay" data-role="panel" data-theme="b">
+
+            <button id="button1">Draw Trip</button>
+            <button id="button4">Clear All Markers</button>
+            <input type="range" id="lat" min="-90" max="90" value="50">
+            <input type="range" id="long" min="-180" max="180" value="20">
+            <input type="range" id="zoom" min="0" max="15" value="9">
+            <br />
+            <ul id="myList" data-role="listview"></ul>  
+            <br/>
+            <button id="getloc">My current position</button>
+            <button id="svToggle">Toggle StreetView</button>
+            <button class="closePanel">Close panel</button>
+        </div>
+
+
+        <div id="panel2" data-position="right" data-display="overlay" data-role="panel" data-theme="b">
+            <h1>my trips</h1>
+            <ul id="myTripList" data-role="listview"></ul>
+            <br />
+            <button id="button2">Send Data</button>
+            <button id="button3">Read data</button>    
+            <button class="closePanel">Close panel</button>
+        </div>
+
+        <div data-role="popup" id="colorPop" data-display="overlay">
+            <div id="colorDiv">
+            </div>
+        </div>
+
+    </div>
+    <script src="cordova.js"> </script>
+</body>
+</html>
